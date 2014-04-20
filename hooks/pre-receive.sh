@@ -34,3 +34,5 @@ else
 	echo "Ok to build and deploy this project"
 	exit 0
 fi
+
+# vim: set ts=4 sw=4 et ai ft=bash:
