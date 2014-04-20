@@ -67,15 +67,16 @@ if [ $? -eq 0 ]; then
     rm -rf $build_dir
     echo "Stop server nginx"
     sudo service nginx stop
-    echo "Stop forever"
-    forever stop "$www_dir/current/server.js"
+    echo "Stop script"
+    sudo service wcb2014 stop
     cd $www_dir
     echo "Change the link current on the new release"
     if [ -f "$www_dir/current" ]; then rm -f current && ln -s "./releases/$newrev" current fi
     #chmod -R g+w "$www_dir/current/"
     sudo chown -R git:www-data "$www_dir/current/"
-    echo "Launch forever"
-    forever start -m 5 -p "$www_dir" -a -l "$log_dir/forever.log" -o "$log_dir/$repo_name.log" -e "$log_dir/error.log" --pidFile "$run_dir/$repo_name.pid" --sourceDir "$www_dir/current/" --minUptime 1000 --spinSleepTime 5000 server.js
+    echo "Launch script"
+    #forever start -m 5 -p "$www_dir" -a -l "$log_dir/forever.log" -o "$log_dir/$repo_name.log" -e "$log_dir/error.log" --pidFile "$run_dir/$repo_name.pid" --sourceDir "$www_dir/current/" --minUptime 1000 --spinSleepTime 5000 server.js
+    sudo service wcb2014 start
     echo "Launch server nginx"
     sudo service nginx start
 else
