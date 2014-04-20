@@ -73,7 +73,7 @@ if [ $? -eq 0 ]; then
     echo "Change the link current on the new release"
     rm -f current && ln -s "./releases/$newrev" current
     echo "Launch forever"
-    forever start -m 5 -p "$www_dir" -l "$www_dir/log/forever.log" -o "$www_dir/log/$repo_name.log" -e "$www_dir/log/error.log" --pidFile "$www_dir/run/$repo_name.pid" --sourceDir "$www_dir/current/" --minUptime 1000 --spinSleepTime 5000 server.js $varScript
+    forever start -m 5 -p "$www_dir" -a -l "$www_dir/log/forever.log" -o "$www_dir/log/$repo_name.log" -e "$www_dir/log/error.log" --pidFile "$www_dir/run/$repo_name.pid" --sourceDir "$www_dir/current/" --minUptime 1000 --spinSleepTime 5000 server.js $varScript
     echo "Launch server nginx"
     sudo service nginx start
 else
