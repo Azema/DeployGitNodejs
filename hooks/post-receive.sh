@@ -49,14 +49,6 @@ releases_dir="$www_dir/releases"
 log_dir="$www_dir/log"
 run_dir="$www_dir/run"
 
-whitelist_regex=${2:-''}
-blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
-if [ -d "$config_dir" ]; then
-    for e in $(ls $config_dir); do
-        echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" && export "$e=$(cat $config_dir/$e)"
-    done
-fi
-
 # Call the script to compile the project
 echo "Go to build the project"
 $HOME/bin/nodejs/bin/compile "$build_dir" "$cache_dir" "$config_dir"
@@ -71,7 +63,8 @@ if [ $? -eq 0 ]; then
     sudo service wcb2014 stop
     cd $www_dir
     echo "Change the link current on the new release"
-    if [ -f "$www_dir/current" ]; then rm -f current && ln -s "./releases/$newrev" current fi
+    if [ -f "$www_dir/current" ]; then rm -f current fi
+    ln -s "$www_dir/releases/$newrev" current
     #chmod -R g+w "$www_dir/current/"
     sudo chown -R git:www-data "$www_dir/current/"
     echo "Launch script"
