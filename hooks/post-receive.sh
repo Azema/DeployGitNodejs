@@ -65,14 +65,15 @@ if [ $? -eq 0 ]; then
     sudo service nginx stop
     echo "Stop script"
     #sudo service wcb2014 stop
-    forever stop --silent "server.js"
+    forever stop "server.js" > /dev/null 2>&1
     echo "Change the link current on the new release"
     if [ -f "$www_dir/current" ]; then rm -f current; fi
     ln -s "$www_dir/releases/$newrev" "$www_dir/current"
     sudo chown -R git:www-data "$www_dir/current/"
     echo "Launch script"
     #sudo service wcb2014 start
-    forever start -m 5 -o "$log_dir/wcb2014.log" -e "$log_dir/error.log" -a --pidFile "$run_dir/wcb2014.pid" --minUptime 1000 --spinSleepTime 1000 -v server.js
+    cd "$www_dir/current"
+    forever start -m 5 -o "$log_dir/wcb2014.log" -e "$log_dir/error.log" -a --pidFile "$run_dir/wcb2014.pid" --minUptime 1000 --spinSleepTime 1000 server.js
     echo "Launch server nginx"
     sudo service nginx start
 else
