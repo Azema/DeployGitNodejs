@@ -85,4 +85,4 @@ fi
 echo "End of script"
 exit 0
 
-# vim: set ts=4 sw=4 et ai ft=bash:
+# vim: set ts=4 sw=4 et ai ft=sh:
