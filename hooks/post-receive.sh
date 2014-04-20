@@ -47,15 +47,12 @@ config_dir="$www_dir/config"
 releases_dir="$www_dir/releases"
 log_dir="$www_dir/log"
 run_dir="$www_dir/run"
-varScript=''
 
 whitelist_regex=${2:-''}
 blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
 if [ -d "$config_dir" ]; then
     for e in $(ls $config_dir); do
-        echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
-        varScript="$varScript $e=$(cat $config_dir/$e)"
-        :
+        echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" && export "$e=$(cat $env_dir/$e)"
     done
 fi
 
@@ -68,12 +65,12 @@ if [ $? -eq 0 ]; then
     echo "Stop server nginx"
     sudo service nginx stop
     echo "Stop forever"
-    forever stop server.js
+    forever stop "$www_dir/current/server.js"
     cd $www_dir
     echo "Change the link current on the new release"
     rm -f current && ln -s "./releases/$newrev" current
     echo "Launch forever"
-    forever start -m 5 -p "$www_dir" -a -l "$www_dir/log/forever.log" -o "$www_dir/log/$repo_name.log" -e "$www_dir/log/error.log" --pidFile "$www_dir/run/$repo_name.pid" --sourceDir "$www_dir/current/" --minUptime 1000 --spinSleepTime 5000 server.js $varScript
+    forever start -m 5 -p "$www_dir" -a -l "$log_dir/forever.log" -o "$log_dir/$repo_name.log" -e "$log_dir/error.log" --pidFile "$run_dir/$repo_name.pid" --sourceDir "$www_dir/current/" --minUptime 1000 --spinSleepTime 5000 server.js
     echo "Launch server nginx"
     sudo service nginx start
 else
