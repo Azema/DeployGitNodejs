@@ -24,7 +24,7 @@ fi
 build_dir=$(mktemp -d)
 git archive $newrev | tar -x --directory $build_dir
 
-is_node=$($HOME/bin/nodejs/detect "$build_dir")
+is_node=$($HOME/bin/nodejs/bin/detect "$build_dir")
 rm -rf "$build_dir"
 
 if [ $is_node == "no" ]; then
