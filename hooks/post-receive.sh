@@ -52,7 +52,7 @@ whitelist_regex=${2:-''}
 blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
 if [ -d "$config_dir" ]; then
     for e in $(ls $config_dir); do
-        echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" && export "$e=$(cat $env_dir/$e)"
+        echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" && export "$e=$(cat $config_dir/$e)"
     done
 fi
 
