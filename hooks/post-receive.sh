@@ -41,7 +41,7 @@ git archive $newrev | tar -x --directory $build_dir
 www_dir="/home/www/$repo_name"
 
 # Create directories of project for cache date of build, the differents releases and the config of build
-mkdir -p "$www_dir/(cache,releases,config,log,run)"
+mkdir -p "$www_dir/{cache,releases,config,log,run}"
 cache_dir="$www_dir/cache"
 config_dir="$www_dir/config"
 releases_dir="$www_dir/releases"
@@ -66,7 +66,7 @@ if [ $? -eq 0 ]; then
     echo "Deploy project: $repo_name"
     mv $build_dir "$releases_dir/$newrev"
     echo "Stop server nginx"
-    service stop nginx
+    sudo service nginx stop
     echo "Stop forever"
     forever stop server.js
     cd $www_dir
@@ -75,7 +75,7 @@ if [ $? -eq 0 ]; then
     echo "Launch forever"
     forever start -m 5 -p "$www_dir" -l "./log/forever.log" -o "./log/$repo_name.log" -e "./log/error.log" --pidFile "./run/$repo_name.pid" --sourceDir "./current/" --minUpTime 1000 --spinSleepTime 5000 server.js $varScript
     echo "Launch server nginx"
-    service start nginx
+    sudo service nginx start
 else
     echo >&2 "Error in compile script"
     rm -rf $build_dir
