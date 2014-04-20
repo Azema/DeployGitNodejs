@@ -4,6 +4,7 @@
 # Command to get two IDs for call this hook for testing
 # git log -2 --format=oneline --reverse
 # ./hooks/post-receive $FROM_ID $TO_ID master
+umask 002
 
 # Parameters
 if ! [ -t 0 ]; then
@@ -69,6 +70,8 @@ if [ $? -eq 0 ]; then
     cd $www_dir
     echo "Change the link current on the new release"
     rm -f current && ln -s "./releases/$newrev" current
+    chmod -R g+w "$www_dir/current/"
+    sudo chown -R www-data:nogroup "$www_dir/current/"
     echo "Launch forever"
     forever start -m 5 -p "$www_dir" -a -l "$log_dir/forever.log" -o "$log_dir/$repo_name.log" -e "$log_dir/error.log" --pidFile "$run_dir/$repo_name.pid" --sourceDir "$www_dir/current/" --minUptime 1000 --spinSleepTime 5000 server.js
     echo "Launch server nginx"
