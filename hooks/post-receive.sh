@@ -41,7 +41,7 @@ git archive $newrev | tar -x --directory $build_dir
 www_dir="/home/www/$repo_name"
 
 # Create directories of project for cache date of build, the differents releases and the config of build
-mkdir -p "$www_dir/{cache,releases,config,log,run}"
+mkdir -p $www_dir/{cache,releases,config,log,run}
 cache_dir="$www_dir/cache"
 config_dir="$www_dir/config"
 releases_dir="$www_dir/releases"
