@@ -35,7 +35,11 @@ repo_name=$(sed -ne '1p' "$GIT_DIR/description" 2>/dev/null)
 echo "Project: $repo_name"
 
 # Directory to build the project
-build_dir=$(mktemp -d)
+build_dir="/tmp/$newrev"
+if [ -d $build_dir ]; then
+    rm -rf $build_dir;
+fi
+mkdir $build_dir
 git archive $newrev | tar -x --directory $build_dir
 
 # Project's directory Web
@@ -52,23 +56,20 @@ run_dir="$www_dir/run"
 # Call the script to compile the project
 echo "Go to build the project"
 $HOME/bin/nodejs/bin/compile "$build_dir" "$cache_dir" "$config_dir"
+echo "compiled: $?"
 if [ $? -eq 0 ]; then
     echo "Deploy project: $repo_name"
-    mkdir "$releases_dir/$newrev"
-    cp -rp "$build_dir/*" "$releases_dir/$newrev/"
-    rm -rf $build_dir
+    if [ -d "$releases_dir/$newrev" ]; then rm -rf "$releases_dir/$newrev"; fi
+    mv "$build_dir" "$releases_dir/"
     echo "Stop server nginx"
     sudo service nginx stop
     echo "Stop script"
     sudo service wcb2014 stop
-    cd $www_dir
     echo "Change the link current on the new release"
-    if [ -f "$www_dir/current" ]; then rm -f current fi
-    ln -s "$www_dir/releases/$newrev" current
-    #chmod -R g+w "$www_dir/current/"
+    if [ -f "$www_dir/current" ]; then rm -f current; fi
+    ln -s "$www_dir/releases/$newrev" "$www_dir/current"
     sudo chown -R git:www-data "$www_dir/current/"
     echo "Launch script"
-    #forever start -m 5 -p "$www_dir" -a -l "$log_dir/forever.log" -o "$log_dir/$repo_name.log" -e "$log_dir/error.log" --pidFile "$run_dir/$repo_name.pid" --sourceDir "$www_dir/current/" --minUptime 1000 --spinSleepTime 5000 server.js
     sudo service wcb2014 start
     echo "Launch server nginx"
     sudo service nginx start
