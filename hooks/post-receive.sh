@@ -53,6 +53,11 @@ releases_dir="$www_dir/releases"
 log_dir="$www_dir/log"
 run_dir="$www_dir/run"
 
+declare -A dameons
+if [ -f "$build_dir/Procfile" ]; then
+    eval $(awk -v quote='"' -F': ' '{ print "daemons["quote$1quote"]="quote$2quote; }' "$build_dir/Procfile")
+fi
+
 # Call the script to compile the project
 echo "Go to build the project"
 $HOME/bin/nodejs/bin/compile "$build_dir" "$cache_dir" "$config_dir"
@@ -63,17 +68,26 @@ if [ $? -eq 0 ]; then
     mv "$build_dir" "$releases_dir/"
     echo "Stop server nginx"
     sudo service nginx stop
-    echo "Stop script"
+    echo "Stop script(s)"
     #sudo service wcb2014 stop
-    forever stop "server.js" > /dev/null 2>&1
+    for key in $(!daemons[*]); do
+        script=$(echo ${daemons[$key]} | awk '{print $NF}')
+        echo "Stop script $key"
+        forever stop $script > /dev/null 2>&1;
+    done
     echo "Change the link current on the new release"
     if [ -f "$www_dir/current" ]; then rm -f current; fi
     ln -s "$www_dir/releases/$newrev" "$www_dir/current"
     sudo chown -R git:www-data "$www_dir/current/"
-    echo "Launch script"
+    echo "Launch script(s)"
     #sudo service wcb2014 start
     cd "$www_dir/current"
-    forever start -m 5 -o "$log_dir/wcb2014.log" -e "$log_dir/error.log" -a --pidFile "$run_dir/wcb2014.pid" --minUptime 1000 --spinSleepTime 1000 server.js
+    for key in $(!daemons[*]); do
+        #script=$(echo ${daemons[$key]} | awk '{print $NF}')
+        echo "Start script $key"
+        forever start ${daemons[$key]};
+    done
+    #forever start -m 5 -o "$log_dir/wcb2014.log" -e "$log_dir/error.log" -a --pidFile "$run_dir/wcb2014.pid" --minUptime 1000 --spinSleepTime 1000 server.js
     echo "Launch server nginx"
     sudo service nginx start
 else
