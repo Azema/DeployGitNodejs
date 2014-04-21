@@ -69,11 +69,12 @@ if [ -f "$build_dir/Procfile" ]; then
     eval $(awk -v quote='"' -F': ' '{ print "daemons["quote$1quote"]="quote$2quote; }' "$build_dir/Procfile");
 fi
 # Check if one daemon is define or if project's root contains server.js file
-if [[ 0 -eq ${#daemons[*]} ]] && [[ !-f "$build_dir/server.js" ]]; then
+if [[ 0 -eq ${#daemons[*]} ]] && [[ ! -f "$build_dir/server.js" ]]; then
     error "No daemons found and no file server.js found at the project's root"
     exit 1;
-elif [ -f "$build_dir/server.js" ]; then
-    daemons["web"]="$build_dir/server.js";
+elif [ 0 -eq ${#daemons[*]} ]; then
+    status "Define server.js as script to launch"
+    daemons["web"]="-m 1 --minUptime 1000 --spinSleepTime 1000 server.js";
 fi
 
 # Call the script to compile the project
@@ -93,15 +94,16 @@ if [ $? -eq 0 ]; then
     status "Stop server nginx"
     sudo service nginx stop
     status "Stop script(s)"
-    for key in $(!daemons[*]); do
+    for key in ${!daemons[*]}; do
         script=$(echo ${daemons[$key]} | awk '{print $NF}')
         status "Stop script: $key"
         forever stop $script > /dev/null 2>&1;
     done
     status "Change the link current on the new release"
     # Remove symbolic link if exists
-    if [ -e "$www_dir/current" ]; then 
-        rm -f current; 
+    if [ -h "$www_dir/current" ]; then
+        status "Remove the symbolic link"
+        rm -f "$www_dir/current";
     fi
     # Create symbolic link to new release
     ln -s "$www_dir/releases/$newrev" "$www_dir/current"
@@ -109,8 +111,8 @@ if [ $? -eq 0 ]; then
     sudo chown -R git:www-data "$www_dir/current/"
     status "Launch script(s)"
     # Move to the new release directory for start daemons
-    cd "$www_dir/current"
-    for key in $(!daemons[*]); do
+    cd "$www_dir/current/"
+    for key in ${!daemons[*]}; do
         status "Start script: $key"
         forever start ${daemons[$key]} > /dev/null;
     done
