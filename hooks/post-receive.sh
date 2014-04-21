@@ -66,7 +66,15 @@ run_dir="$www_dir/run"
 unset daemons
 declare -A daemons
 if [ -f "$build_dir/Procfile" ]; then
-    eval $(awk -v quote='"' -F': ' '{ print "daemons["quote$1quote"]="quote$2quote; }' "$build_dir/Procfile");
+    whitelist_regex=${2:-''}
+    blacklist_regex=${3:-'(\$build_dir|\$www_dir|\$cache_dir|\$config_dir|\$releases_dir|\$run_dir)'}
+    cat "$build_dir/Procfile" | while read line; do
+        command_line=$(echo $line | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" && echo $line)
+        if [ -n "$command_line" ]; then
+            eval $(echo $command_line | awk -v quote='"' -F': ' '{ print "daemons["quote$1quote"]="quote$2quote; }');
+        fi
+    done
+    #eval $(awk -v quote='"' -F': ' '{ print "daemons["quote$1quote"]="quote$2quote; }' "$build_dir/Procfile");
 fi
 # Check if one daemon is define or if project's root contains server.js file
 if [[ 0 -eq ${#daemons[*]} ]] && [[ ! -f "$build_dir/server.js" ]]; then
