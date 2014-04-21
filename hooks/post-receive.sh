@@ -69,7 +69,7 @@ if [ -f "$build_dir/Procfile" ]; then
     eval $(awk -v quote='"' -F': ' '{ print "daemons["quote$1quote"]="quote$2quote; }' "$build_dir/Procfile");
 fi
 # Check if one daemon is define or if project's root contains server.js file
-if [[ 0 -eq ${#daemons[*]} ] && [ !-f "$build_dir/server.js" ]]; then
+if [[ 0 -eq ${#daemons[*]} ]] && [[ !-f "$build_dir/server.js" ]]; then
     error "No daemons found and no file server.js found at the project's root"
     exit 1;
 elif [ -f "$build_dir/server.js" ]; then
