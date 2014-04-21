@@ -70,7 +70,7 @@ if [ $? -eq 0 ]; then
     sudo service nginx stop
     echo "Stop script(s)"
     #sudo service wcb2014 stop
-    for key in $(!daemons[*]); do
+    for key in $(!$daemons[*]); do
         script=$(echo ${daemons[$key]} | awk '{print $NF}')
         echo "Stop script $key"
         forever stop $script > /dev/null 2>&1;
@@ -82,7 +82,7 @@ if [ $? -eq 0 ]; then
     echo "Launch script(s)"
     #sudo service wcb2014 start
     cd "$www_dir/current"
-    for key in $(!daemons[*]); do
+    for key in $(!$daemons[*]); do
         #script=$(echo ${daemons[$key]} | awk '{print $NF}')
         echo "Start script $key"
         forever start ${daemons[$key]};
