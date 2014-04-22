@@ -1,10 +1,8 @@
-Project to deploy an app Node.js
-============================
+# Project to deploy an app Node.js
 This project embed the [Heroku Buildpack for Node.js](https://github.com/heroku/heroku-buildpack-nodejs).
 
 This project add a hook **post-receive** at placed to your bare repository Git of your project.
-The hook do:
-------------
+### The hook do:
 * Check the Git directory
 * Check the branch to deploy only master
 * Retrieve the repository name from the description file
@@ -22,8 +20,7 @@ The hook do:
  * Launch scripts with forever
  * Launch Nginx server
 
- Usage:
- ------
+## Usage:
 
 On your server, create a user **git**
 ```
@@ -71,13 +68,13 @@ $ git fetch your_remote_name
 $ git push your_remote_name master
 ```
 
-=== Variables:
-==== In post-receive hook:
+### Variables:
+#### In post-receive hook:
 * _user_: Define the user git
 * _group_: Define the group Web
 * _www_dir_: Define the Web directory
 
-==== In Procfile
+#### In Procfile
 * One script by line
 * The line begin with name of your script (web, daemon, etc...)
 * Separe name and command line with **:**
@@ -88,9 +85,12 @@ Example:
 web: -m 5 --minUptime 1000 --spinSleepTime 500 -a -l "$log_dir/server-forever.log" -o "$log_dir/server.log" -e "$log_dir/server-error.log" server.js) 
 ```
 
-=== Structure Web directory
-|- cache (directory: contains the node_modules directory and node version)
-|- config (directory: contains your config variables for your script)
+### Structure Web directory
+```
+/
+|- cache/ (directory: contains the node_modules directory and node version)
+|- config/ (directory: contains your config variables for your script)
 |- current (symbolic link: point the last release)
-|- log (directory: contains your log files)
-|- releases (directory: contains the last releases)
+|- log/ (directory: contains your log files)
+|- releases/ (directory: contains the last releases)
+```
