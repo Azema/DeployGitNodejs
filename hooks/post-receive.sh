@@ -5,6 +5,8 @@
 # git log -2 --format=oneline --reverse
 # echo $FROM_ID $TO_ID refs/heads/master | ./hooks/post-receive
 umask 022
+user="git"
+group="www-data"
 
 # Load some convenience functions like status(), echo(), and indent()
 source $HOME/bin/nodejs/bin/common.sh
@@ -62,19 +64,19 @@ releases_dir="$www_dir/releases"
 log_dir="$www_dir/log"
 run_dir="$www_dir/run"
 
-# Resolv daemons from Procfile at the project's root
-unset daemons
-declare -A daemons
+# Resolv scripts_node from Procfile at the project's root
+unset scripts_node
+declare -A scripts_node
 if [ -f "$build_dir/Procfile" ]; then
-    eval $(awk -v quote='"' -F': ' '{ print "daemons["quote$1quote"]="quote$2quote; }' "$build_dir/Procfile");
+    eval $(awk -v quote='"' -F': ' '{ print "scripts_node["quote$1quote"]="quote$2quote; }' "$build_dir/Procfile");
 fi
 # Check if one daemon is define or if project's root contains server.js file
-if [[ 0 -eq ${#daemons[*]} ]] && [[ ! -f "$build_dir/server.js" ]]; then
-    error "No daemons found and no file server.js found at the project's root"
+if [[ 0 -eq ${#scripts_node[*]} ]] && [[ ! -f "$build_dir/server.js" ]]; then
+    error "No scripts_node found and no file server.js found at the project's root"
     exit 1;
-elif [ 0 -eq ${#daemons[*]} ]; then
+elif [ 0 -eq ${#scripts_node[*]} ]; then
     status "Define server.js as script to launch"
-    daemons["web"]="-m 1 --minUptime 1000 --spinSleepTime 1000 server.js";
+    scripts_node["web"]="-m 1 --minUptime 1000 --spinSleepTime 1000 server.js";
 fi
 
 # Call the script to compile the project
@@ -94,8 +96,8 @@ if [ $? -eq 0 ]; then
     status "Stop server nginx"
     sudo service nginx stop
     status "Stop script(s)"
-    for key in ${!daemons[*]}; do
-        script=$(echo ${daemons[$key]} | awk '{print $NF}')
+    for key in ${!scripts_node[*]}; do
+        script=$(echo ${scripts_node[$key]} | awk '{print $NF}')
         status "Stop script: $key"
         forever stop $script > /dev/null 2>&1;
     done
@@ -108,13 +110,14 @@ if [ $? -eq 0 ]; then
     # Create symbolic link to new release
     ln -s "$www_dir/releases/$newrev" "$www_dir/current"
     # Change group of release files to group Web
-    sudo chown -R git:www-data "$www_dir/current/"
+    sudo chown -R $user:$group "$www_dir/current/"
     status "Launch script(s)"
-    # Move to the new release directory for start daemons
+    # Move to the new release directory for start scripts_node
     cd "$www_dir/current/"
-    for key in ${!daemons[*]}; do
+    export_env_dir $config_dir
+    for key in ${!scripts_node[*]}; do
         status "Start script: $key"
-        forever start ${daemons[$key]} > /dev/null;
+        forever start ${scripts_node[$key]} > /dev/null;
     done
     status "Launch server nginx"
     sudo service nginx start
