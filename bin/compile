@@ -64,6 +64,7 @@ if [ -f "$build_dir/bower.json" ]; then
   if [ -f "$build_dir/.bowerrc" ]; then
     bower_dest=$(cat $build_dir/.bowerrc | grep 'directory' | sed -re 's/\s*"directory":\s*"([^"]*)".*$/\1/')
   fi
+  status "bower components directory: $bower_dest"
   # Check if a fingerprint of bower.json exists in cache directory
   if [ -f "$cache_dir/bower.md5" ]; then
     check=$(md5sum --check "$cache_dir/bower.md5" 2>&1 | grep -c 'OK')
@@ -77,7 +78,7 @@ if [ -f "$build_dir/bower.json" ]; then
     fi
   fi
   status "Installing bower components"
-  bower install --production -q 2>&1 | indent
+  bower install --production 2>&1 | indent
   # store fingerprint of bower.json
   md5sum "$build_dir/bower.json" > "$cache_dir/bower.md5"
 fi
