@@ -75,25 +75,6 @@ elif test -d $cache_dir/node/node_modules; then
 
 fi
 
-# Handle npm's new cert bug
-# http://blog.npmjs.org/post/78085451721/npms-self-signed-certificate-is-no-more
-if [ ! -f "$build_dir/.npmrc" ]; then
-  status "Writing a custom .npmrc to circumvent npm bugs"
-  echo "ca=" > "$build_dir/.npmrc"
-fi
-
-# Scope config var availability only to `npm install`
-(
-  if [ -d "$env_dir" ]; then
-    status "Exporting config vars to environment"
-    export_env_dir $env_dir
-  fi
-
-  status "Installing dependencies"
-  # Make npm output to STDOUT instead of its default STDERR
-  npm install --userconfig $build_dir/.npmrc --production 2>&1 | indent
-)
-
 # Persist goodies like node-version in the slug
 mkdir -p $build_dir/.heroku
 
@@ -126,6 +107,25 @@ if [ -f "$build_dir/bower.json" ]; then
   # store fingerprint of bower.json
   md5sum "$build_dir/bower.json" > "$cache_dir/bower.md5"
 fi
+
+# Handle npm's new cert bug
+# http://blog.npmjs.org/post/78085451721/npms-self-signed-certificate-is-no-more
+if [ ! -f "$build_dir/.npmrc" ]; then
+  status "Writing a custom .npmrc to circumvent npm bugs"
+  echo "ca=" > "$build_dir/.npmrc"
+fi
+
+# Scope config var availability only to `npm install`
+(
+  if [ -d "$env_dir" ]; then
+    status "Exporting config vars to environment"
+    export_env_dir $env_dir
+  fi
+
+  status "Installing dependencies"
+  # Make npm output to STDOUT instead of its default STDERR
+  npm install --userconfig $build_dir/.npmrc --production 2>&1 | indent
+)
 
 # Purge node-related cached content, being careful not to purge the top-level
 # cache, for the sake of heroku-buildpack-multi apps.
