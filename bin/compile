@@ -59,7 +59,7 @@ cd $build_dir
 # Bower
 ##
 if [ -f "$build_dir/bower.json" ]; then
-  bower_dest="$build_dir/bower_components"
+  bower_dest="bower_components"
   # Retrieve bower install directory from .bowerrc
   if [ -f "$build_dir/.bowerrc" ]; then
     bower_dest=$(cat $build_dir/.bowerrc | grep 'directory' | sed -re 's/\s*"directory":\s*"([^"]*)".*$/\1/')
@@ -67,9 +67,9 @@ if [ -f "$build_dir/bower.json" ]; then
   status "bower components directory: $bower_dest"
   # Check if a fingerprint of bower.json exists in cache directory
   if [ -f "$cache_dir/bower.md5" ]; then
-    check=$(md5sum --check "$cache_dir/bower.md5" 2>&1 | grep -c 'OK')
+    fingerprint=$(md5sum "$build_dir/bower.json")
     # Check if bower.json is same since last build
-    if [ 1 -eq $check ] && [ -d "$cache_dir/node/bower_components" ]; then
+    if [ "$fingerprint" == "$(cat $cache_dir/bower.md5)" ] && [ -d "$cache_dir/node/bower_components" ]; then
       status "Restoring bower_components directory from cache"
       cp -r "$cache_dir/node/bower_components" "$bower_dest"
 
