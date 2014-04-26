@@ -96,3 +96,23 @@ web: -m 5 --minUptime 1000 --spinSleepTime 500 -a -l "$log_dir/server-forever.lo
 |- log/ (directory: contains your log files)
 |- releases/ (directory: contains the last releases)
 ```
+
+## Tests
+Test compile script with this command:
+```
+$ ./bin/test
+```
+
+## Versions
+
+### Carole (v1.1.0)
+
+Compile script cache bower components if bower.json file exists
+
+### Paul-Ricard (v1.0.0)
+
+DeployGitNodejs first release.
+
+- Deploy an application Node.js on git push
+- Install npm modules dependencies
+- Start application script with forever
