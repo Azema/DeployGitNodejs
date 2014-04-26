@@ -69,9 +69,7 @@ if [ -f "$build_dir/bower.json" ]; then
   if [ -f "$cache_dir/bower.md5" ]; then
     fingerprint=$(getFileMD5 "$build_dir/bower.json" | cut -d ' ' -f1)
     # Check if bower.json is same since last build
-    if [ -n "$fingerprint" ] && [ "$fingerprint" == "$(cat $cache_dir/bower.md5 | cut -d ' ' -f1)" ] 
-      && [ -d "$cache_dir/node/bower_components" ]
-      then
+    if [ -n "$fingerprint" ] && [ "$fingerprint" == "$(cat $cache_dir/bower.md5 | cut -d ' ' -f1)" ] && [ -d "$cache_dir/node/bower_components" ]; then
       status "Restoring bower_components directory from cache"
       cp -r "$cache_dir/node/bower_components" "$bower_dest"
 
