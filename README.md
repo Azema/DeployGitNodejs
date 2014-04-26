@@ -1,6 +1,8 @@
 # Project to deploy an app Node.js
 This project embed the [Heroku Buildpack for Node.js](https://github.com/heroku/heroku-buildpack-nodejs).
 
+French documentation on the server config for this tool (http://blog.phigrate.org/config-server-for-deploy-with-git-push/)
+
 This project add a hook **post-receive** at placed to your bare repository Git of your project.
 ### The hook do:
 * Check the Git directory
