@@ -41,3 +41,17 @@ export_env_dir() {
     done
   fi
 }
+
+command_exists () {
+  type "$1" > /dev/null 2>&1 ;
+}
+
+getFileMD5() {
+  if command_exists "md5sum"; then
+    echo `md5sum $1`
+  elif command_exists "md5"; then
+    echo `md5 $1`
+  else
+    echo ''
+  fi
+}

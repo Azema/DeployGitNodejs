@@ -67,9 +67,10 @@ if [ -f "$build_dir/bower.json" ]; then
   status "bower components directory: $bower_dest"
   # Check if a fingerprint of bower.json exists in cache directory
   if [ -f "$cache_dir/bower.md5" ]; then
-    fingerprint=$(md5sum "$build_dir/bower.json")
+    fingerprint=getFileMD5 "$build_dir/bower.json"
+    #fingerprint=$(md5sum "$build_dir/bower.json")
     # Check if bower.json is same since last build
-    if [ "$fingerprint" == "$(cat $cache_dir/bower.md5)" ] && [ -d "$cache_dir/node/bower_components" ]; then
+    if [ -n "$fingerprint" ] && [ "$fingerprint" == "$(cat $cache_dir/bower.md5)" ] && [ -d "$cache_dir/node/bower_components" ]; then
       status "Restoring bower_components directory from cache"
       cp -r "$cache_dir/node/bower_components" "$bower_dest"
 
@@ -80,7 +81,8 @@ if [ -f "$build_dir/bower.json" ]; then
   status "Installing bower components"
   bower install --production 2>&1 | indent
   # store fingerprint of bower.json
-  md5sum "$build_dir/bower.json" > "$cache_dir/bower.md5"
+  echo getFileMD5 "$build_dir/bower.json" > "$cache_dir/bower.md5"
+  #md5sum "$build_dir/bower.json" > "$cache_dir/bower.md5"
 fi
 
 # If node_modules directory is checked into source control then
