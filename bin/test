@@ -84,10 +84,28 @@ testBowerComponentsCached() {
   assertEquals "2" "$(ls -1 $cache/ | wc -l)"
 }
 
-testBowerDirectory() {
+testBowerCustomDirectory() {
   cache=$(mktmpdir)
   compile "bower-directory" $cache
   assertCaptured "vendor"
+  assertEquals "2" "$(ls -1 $cache/ | wc -l)"
+}
+
+testBowerFingerprint() {
+  cache=$(mktmpdir)
+  md5sum ${bp_dir}/test/bower-md5/bower.json > "$cache/bower.md5"
+  compile "bower-md5" $cache
+  assertNotCaptured "Restoring bower_components"
+  assertEquals "2" "$(ls -1 $cache/ | wc -l)"
+}
+
+testBowerRestoreComponentsCached() {
+  cache=$(mktmpdir)
+  mkdir $cache/node
+  cp -r ${bp_dir}/test/bower-components/components $cache/node/bower_components
+  md5sum ${bp_dir}/test/bower-components/bower.json > "$cache/bower.md5"
+  compile "bower-components" $cache
+  assertCaptured "Restoring bower_components"
   assertEquals "2" "$(ls -1 $cache/ | wc -l)"
 }
 
