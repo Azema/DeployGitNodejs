@@ -77,6 +77,20 @@ testNodeModulesCached() {
   assertEquals "1" "$(ls -1 $cache/ | wc -l)"
 }
 
+testBowerComponentsCached() {
+  cache=$(mktmpdir)
+  compile "caching-bower" $cache
+  assertCaptured "Caching bower"
+  assertEquals "2" "$(ls -1 $cache/ | wc -l)"
+}
+
+testBowerDirectory() {
+  cache=$(mktmpdir)
+  compile "bower-directory" $cache
+  assertCaptured "vendor"
+  assertEquals "2" "$(ls -1 $cache/ | wc -l)"
+}
+
 testModulesCheckedIn() {
   compile "modules-checked-in"
   assertCaptured "Found existing node_modules directory; skipping cache"
