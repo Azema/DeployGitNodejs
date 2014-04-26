@@ -107,6 +107,7 @@ testBowerRestoreComponentsCached() {
   compile "bower-components" $cache
   assertCaptured "Restoring bower_components"
   assertEquals "2" "$(ls -1 $cache/ | wc -l)"
+  assertEquals "1" "$(ls -1 $cache/node/bower_components | wc -l)"
 }
 
 testModulesCheckedIn() {
