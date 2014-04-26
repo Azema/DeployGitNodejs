@@ -55,6 +55,33 @@ fi
 # Run subsequent node/npm commands from the build path
 cd $build_dir
 
+##
+# Bower
+##
+if [ -f "$build_dir/bower.json" ]; then
+  bower_dest="$build_dir/bower_components"
+  # Retrieve bower install directory from .bowerrc
+  if [ -f "$build_dir/.bowerrc" ]; then
+    bower_dest=$(cat $build_dir/.bowerrc | grep 'directory' | sed -re 's/\s*"directory":\s*"([^"]*)".*$/\1/')
+  fi
+  # Check if a fingerprint of bower.json exists in cache directory
+  if [ -f "$cache_dir/bower.md5" ]; then
+    check=$(md5sum --check "$cache_dir/bower.md5" 2>&1 | grep -c 'OK')
+    # Check if bower.json is same since last build
+    if [ 1 -eq $check ] && [ -d "$cache_dir/node/bower_components" ]; then
+      status "Restoring bower_components directory from cache"
+      cp -r "$cache_dir/node/bower_components" "$bower_dest"
+
+      status "Pruning cached dependencies"
+      bower prune -q 2>&1 | indent
+    fi
+  fi
+  status "Installing bower components"
+  bower install --production -q 2>&1 | indent
+  # store fingerprint of bower.json
+  md5sum "$build_dir/bower.json" > "$cache_dir/bower.md5"
+fi
+
 # If node_modules directory is checked into source control then
 # rebuild any native deps. Otherwise, restore from the build cache.
 if test -d $build_dir/node_modules; then
@@ -80,33 +107,6 @@ mkdir -p $build_dir/.heroku
 
 # Save resolved node version in the slug for later reference
 echo $node_version > $build_dir/.heroku/node-version
-
-##
-# Bower
-##
-if [ -f "$build_dir/bower.json" ]; then
-  bower_dest="$build_dir/bower_components"
-  # Retrieve bower install directory from .bowerrc
-  if [ -f "$build_dir/.bowerrc" ]; then
-    bower_dest=$(cat $build_dir/.bowerrc | grep 'directory' | sed -re 's/\s*"directory":\s*"([^"]*)".*$/\1/')
-  fi
-  # Check if a fingerprint of bower.json exists in cache directory
-  if [ -f "$cache_dir/bower.md5" ]; then
-    check=$(md5sum --check "$cache_dir/bower.md5" 2>&1 | grep -c 'OK')
-    # Check if bower.json is same since last build
-    if [ 1 -eq $check ] && [ -d "$cache_dir/node/bower_components" ]; then
-      status "Restoring bower_components directory from cache"
-      cp -r "$cache_dir/node/bower_components/*" "$bower_dest/"
-
-      status "Pruning cached dependencies"
-      bower prune -q 2>&1 | indent
-    fi
-  fi
-  status "Installing bower components"
-  bower install --production -q 2>&1 | indent
-  # store fingerprint of bower.json
-  md5sum "$build_dir/bower.json" > "$cache_dir/bower.md5"
-fi
 
 # Handle npm's new cert bug
 # http://blog.npmjs.org/post/78085451721/npms-self-signed-certificate-is-no-more
@@ -141,9 +141,8 @@ fi
 
 # If app has bower.json file, cache bower_components
 if [ -f "$build_dir/bower.json" ]; then
-  mkdir "$cache_dir/node/bower_components"
   status "Caching bower_components directory for future builds"
-  cp -r "$bower_dest/*" "$cache_dir/node/bower_components/"
+  cp -r "$bower_dest" "$cache_dir/node/bower_components"
   status "Cleaning up bower cache"
   bower cache clean --silent 2>&1 | indent
 fi
