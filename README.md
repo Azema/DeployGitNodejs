@@ -107,6 +107,10 @@ $ ./bin/test
 
 ## Versions
 
+### Magny-cours (v1.2.0)
+
+Keep the last 5 releases and remove other
+
 ### Carole (v1.1.0)
 
 Compile script cache bower components if bower.json file exists
