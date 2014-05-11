@@ -93,6 +93,11 @@ if [ $? -eq 0 ]; then
     fi
     # Move build_dir to releases directory
     mv "$build_dir" "$releases_dir/"
+    # keep the last 5 releases
+    status "Remove old releases"
+    for r in $(ls -1t $releases_dir | tail -n +6); do
+        rm -rf "$releases_dir/$r"
+    done
     status "Stop server nginx"
     sudo service nginx stop
     status "Stop script(s)"
@@ -121,6 +126,7 @@ if [ $? -eq 0 ]; then
     done
     status "Launch server nginx"
     sudo service nginx start
+
 else
     # compile error, remove build_dir
     rm -rf $build_dir
