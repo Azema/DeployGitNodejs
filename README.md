@@ -16,6 +16,7 @@ This project add a hook **post-receive** at placed to your bare repository Git o
 * Call compile script of the Heroku Buildpack
 * If the return of compile is OK:
  * Move the build directory to releases directory
+ * Keep the last 5 releases and remove other
  * Stop Nginx server
  * Stop scripts with forever
  * Remove and create a new symbolic link to the new release
@@ -82,6 +83,7 @@ $ git push your_remote_name master
 * Separe name and command line with **:**
 * Add your parameters for forever launch (-l: logs forever, -o logs stdout, -e: logs stderr, etc...) see forever [documentation](https://github.com/nodejitsu/forever)
 * You can use the variable _$log_dir_ => web_directory/log
+
 Example:
 ```
 web: -m 5 --minUptime 1000 --spinSleepTime 500 -a -l "$log_dir/server-forever.log" -o "$log_dir/server.log" -e "$log_dir/server-error.log" server.js) 
